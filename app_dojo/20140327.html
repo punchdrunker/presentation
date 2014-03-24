@@ -109,6 +109,33 @@
 
                 <section data-markdown>
                 <script type="text/template">
+                    ## とりあえずググった
+
+                    [安定のstackoverflow](http://stackoverflow.com/questions/6113243/how-to-find-unused-images-in-an-xcode-project)
+
+                    ```
+                    #!/bin/sh
+                    PROJ=`find . -name '*.xib' -o -name '*.[mh]'`
+
+                    for png in `find . -name '*.png'`
+                    do
+                        name=`basename $png`
+                        if ! grep -qhs "$name" "$PROJ"; then
+                            echo "$png is not referenced"
+                        fi
+                    done
+                    ```
+                </script>
+                </section>
+
+                <section data-markdown>
+                <script type="text/template">
+                    ## grep ... (´・ω・｀)
+                </script>
+                </section>
+
+                <section data-markdown>
+                <script type="text/template">
                     ## [余談]Macのgrep
 
                     iPhoneアプリのJenkinsって大体Mac => 大体 BSD grep
@@ -130,7 +157,7 @@
 
                     ```
                     my $root_dir = Path::Class::dir(ROOT_DIR);
-                    our $source_text = 'hoge';
+                    our $source_text = '';
                     find(\&process, $root_dir);
                     # TODO: ソースコードがあんまりデカい場合は、chunkに分けるとか工夫する
                     sub process {
@@ -171,6 +198,7 @@
                     手元の環境で2秒くらいで終わった ＼(^o^)／
 
                     削除した結果↓
+
                     ```
                     $ find ./Resources/Images | wc -l  
                     # 1383 => 1205(180個減)
@@ -186,7 +214,7 @@
 
                     動的にロードした画像には対応できない
                     
-                    コーディング規約でカバーするしかない
+                    コーディング規約で禁止するしかない
 
                     ```
                     NSString* imageName = [NSString stringWithFormat:@"button-%d", buttonNumber];
@@ -244,7 +272,7 @@
 
                 <section data-markdown>
                 <script type="text/template">
-                    ## com.android.tools.lint.checks;
+                    ## com.android.tools.lint.checks.UnusedResourceDetector;
 
                     ### 色々準備するmethods
 
@@ -261,9 +289,9 @@
 
                 <section data-markdown>
                 <script type="text/template">
-                    ## com.android.tools.lint.checks;
+                    ## com.android.tools.lint.checks.UnusedResourceDetector;
 
-                    ### 仕上げのmethods
+                    ### 仕上げのmethod
 
                     - public void afterCheckProject(@NonNull Context context)
 
