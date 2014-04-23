@@ -67,7 +67,7 @@
                     $ find ./Resources/Images | wc -l
                     # => 1383
                     $ du  ./Resources/Images
-                    # => 14576
+                    # => 14576 KB
                     ```
                 </script>
                 </section>
@@ -101,8 +101,9 @@
                 <script type="text/template">
                     ## grep -R $name_as_resource ./*
 
-                    - 対象ファイルn個くらい
-                    - 1383 * n = x 回 grep走る!
+                    - 画像 1383 個
+                    - 検索対象ファイル6393個
+                    - 1383 * 6393 = 8,841,519 回の File read!
                     - 手元の環境で5分くらいかかった
                 </script>
                 </section>
@@ -195,7 +196,7 @@
                 <script type="text/template">
                     ## 結果
 
-                    手元の環境で2秒くらいで終わった ＼(^o^)／
+                    手元の環境で2秒くらい(約150倍速)で終わった ＼(^o^)／
 
                     削除した結果↓
 
@@ -203,7 +204,7 @@
                     $ find ./Resources/Images | wc -l  
                     # 1383 => 1205(180個減)
                     $ du  ./Resources/Images
-                    # 14576 => 13344 (1.2MB減)
+                    # 14576 KB => 13344 KB (1.2MB減)
                     ```
                 </script>
                 </section>
@@ -229,6 +230,7 @@
 
                     - プロジェクトファイルを手動マージ!  
                     - 実機で落ちた ／(^o^)＼ 
+                    - 間違って、必要な画像ファイルの参照消しちゃったぽい
                     - Simulatorだとキャッシュされてる(DerivedData) 
                     - Jenkinsで毎回DerivedDataを削除しつつ、UIテスト回すべき
                         - (~/Library/Developer/Xcode/DerivedData/app_name-xxxxxx)
@@ -260,13 +262,15 @@
 
                 <section data-markdown>
                 <script type="text/template">
-                    ## com.android.tools.lint.checks;
+                    ## com.android.tools.lint.checks.UnusedResourceDetector;
 
                     ### fields
 
-                    - private Set<String> mDeclarations; // 存在してるリソースを格納
-                    - private Set<String> mReferences; // 参照されてるリソースを格納
-                    - private Map<String, Location> mUnused; // 使ってないリソースを格納
+                    ```
+                    private Set<String> mDeclarations; // 存在してるリソースを格納
+                    private Set<String> mReferences; // 参照されてるリソースを格納
+                    private Map<String, Location> mUnused; // 使ってないリソースを格納
+                    ```
                 </script>
                 </section>
 
@@ -274,16 +278,18 @@
                 <script type="text/template">
                     ## com.android.tools.lint.checks.UnusedResourceDetector;
 
-                    ### 色々準備するmethods
+                    ### 色々準備するmethodとか
 
                     DOMのあれこれが面倒そう
 
-                    - public void beforeCheckFile(@NonNull Context context)
-                    - public void visitElement(@NonNull XmlContext context, @NonNull Element element)
-                    - public void visitAttribute(@NonNull XmlContext context, @NonNull Attr attribute)
-                    - private class UnusedResourceVisitor extends ForwardingAstVisitor
-                    - private void checkChildRefs(Element item)
-                    - とかいろいろある
+                    ```
+                    public void beforeCheckFile(@NonNull Context context) {}
+                    public void visitElement(@NonNull XmlContext context, @NonNull Element element) {}
+                    public void visitAttribute(@NonNull XmlContext context, @NonNull Attr attribute) {}
+                    private void checkChildRefs(Element item) {}
+                    private class UnusedResourceVisitor extends ForwardingAstVisitor {}
+                    // とか他にもいろいろある
+                    ```
                 </script>
                 </section>
 
@@ -293,11 +299,13 @@
 
                     ### 仕上げのmethod
 
-                    - public void afterCheckProject(@NonNull Context context)
+                    ```
+                    public void afterCheckProject(@NonNull Context context)
+                    ```
 
-                    対象を全件操作して、最後にmDeclarationsとmReferencesを比較して mUnusedを作る
-
-                    そもそも命名が、 R.[type].[name]なので、Objective-Cより検出簡単
+                    - 対象を全件ロードした後に↑のメソッドが実行される
+                    - mDeclarationsとmReferencesを比較して mUnusedを作る
+                    - そもそも命名が、 R.[type].[name]なので、Objective-Cより検出簡単
                 </script>
                 </section>
 
