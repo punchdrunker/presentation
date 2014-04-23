@@ -1,0 +1,342 @@
+
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+
+        <title>app 道場 - Getting Started with iBeacon</title>
+
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <link rel="stylesheet" href="../reveal.js/css/reveal.min.css">
+        <link rel="stylesheet" href="../reveal.js/css/theme/default.css" id="theme">
+
+        <!-- For syntax highlighting -->
+        <link rel="stylesheet" href="../reveal.js/lib/css/zenburn.css">
+
+        <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+        <script>
+            if( window.location.search.match( /print-pdf/gi ) ) {
+            var link = document.createElement( 'link' );
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = '../reveal.jscss/print/pdf.css';
+            document.getElementsByTagName( 'head' )[0].appendChild( link );
+            }
+        </script>
+
+        <!--[if lt IE 9]>
+        <script src="../reveal.jslib/js/html5shiv.js"></script>
+        <![endif]-->
+    </head>
+
+    <body>
+
+        <div class="reveal">
+
+            <!-- Any section element inside of this container is displayed as a slide -->
+            <div class="slides">
+                <section>
+                <h1>iBeacon(超)入門</h1>
+                <p>
+                <small>Created by <a href="http://github.com/punchdrunker">punchdrunker</a> / <a href="http://twitter.com/punchdrunker">@punchdrunker</a></small>
+                </p>
+                </section>
+
+                <section>
+                <h2>iBeacon</h2>
+                <p>こんなので</p>
+                <img src="beacon.png" />
+                <p><small>source: <a href="http://estimote.com/">estimote beacons</a></small></p>
+                </section>
+
+                <section>
+                <h2>iBeacon</h2>
+                <p>こんなのができる</p>
+                <img src="retail.jpg" />
+                <p><small>source: <a href="http://estimote.com/">estimote beacons</a></small></p>
+                </section>
+
+                <section data-markdown>
+                <script type="text/template">
+                    ## Beaconアプリ作成例
+
+                    ```
+                    - (void)viewDidLoad
+                    {
+                        [super viewDidLoad];
+
+                        self.proximityUUID = [[NSUUID alloc] initWithUUIDString:@"生成したUUID文字列"];
+                        self.peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:nil options:nil];
+                        if (self.peripheralManager.state == CBPeripheralManagerStatePoweredOn) {
+                            [self startAdvertising];
+                        }
+                    }
+
+                    - (void)startAdvertising
+                    {
+                        CLBeaconRegion *beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUID
+                        major:1
+                        minor:2
+                        identifier:@"jp.classmethod.testregion"];
+                        NSDictionary *beaconPeripheralData = [beaconRegion peripheralDataWithMeasuredPower:nil];
+
+                        // Start Advertising
+                        [self.peripheralManager startAdvertising:beaconPeripheralData];
+                    }
+                    ```
+                </script>
+                </section>
+
+
+                <section data-markdown>
+                <script type="text/template">
+                    ## grep -R $name_as_resource ./*
+
+                    - 対象ファイルn個くらい
+                    - 1383 * n = x 回 grep走る!
+                    - 手元の環境で5分くらいかかった
+                </script>
+                </section>
+
+                <section data-markdown>
+                <script type="text/template">
+                    ## とりあえずググった
+
+                    [安定のstackoverflow](http://stackoverflow.com/questions/6113243/how-to-find-unused-images-in-an-xcode-project)
+
+                    ```
+                    #!/bin/sh
+                    PROJ=`find . -name '*.xib' -o -name '*.[mh]'`
+
+                    for png in `find . -name '*.png'`
+                    do
+                        name=`basename $png`
+                        if ! grep -qhs "$name" "$PROJ"; then
+                            echo "$png is not referenced"
+                        fi
+                    done
+                    ```
+                </script>
+                </section>
+
+                <section data-markdown>
+                <script type="text/template">
+                    ## grep ... (´・ω・｀)
+                </script>
+                </section>
+
+                <section data-markdown>
+                <script type="text/template">
+                    ## [余談]Macのgrep
+
+                    iPhoneアプリのJenkinsって大体Mac => 大体 BSD grep
+
+                    (4年前の話題ですが。。。)
+
+                    * [why GNU grep is fast](http://lists.freebsd.org/pipermail/freebsd-current/2010-August/019310.html)
+                    * [GNU grepが高速な理由](http://news.mynavi.jp/articles/2010/08/25/why-gnu-grep-is-fast-than-bsd/)
+                </script>
+                </section>
+
+                <section data-markdown>
+                <script type="text/template">
+                    ## とりあえず速くしよう
+
+                    grepていうより、繰り返し回数の問題
+
+                    検索対象を一旦メモリに展開(.m/.plist/.xib)
+
+                    ```
+                    my $root_dir = Path::Class::dir(ROOT_DIR);
+                    our $source_text = '';
+                    find(\&process, $root_dir);
+                    # TODO: ソースコードがあんまりデカい場合は、chunkに分けるとか工夫する
+                    sub process {
+                        return unless is_file_using_resources($_);
+                        my $path = $_;
+                        open my $fh, '<', $path
+                        or die qq/Can't open file "$path" : $!/;
+                        my @lines = <$fh>;
+                        $source_text .= join('', @lines);
+                        close($fh);
+                    }
+
+                    my $images_dir = Path::Class::dir(IMAGE_DIR);
+                    my @fails = ();
+                    while(my $child = $images_dir->next) {
+                        next if $child->is_dir;
+                        my $image = $child;
+                        next if is_retina_image($image); # for short test time
+                        # ignore resources which is loaded dynamic
+                        next if is_4inch_image($image);
+                        next if is_ios6_image($image);
+
+                        my $name_as_resource = get_name_as_resource($image);
+                        next if List::MoreUtils::any {$_ eq $name_as_resource} @blacklist;
+
+                        my $index = index($source_text, $name_as_resource);
+                        push @fails, $name_as_resource if $index==-1;
+                    }
+                    ```
+
+                </script>
+                </section>
+
+                <section data-markdown>
+                <script type="text/template">
+                    ## 結果
+
+                    手元の環境で2秒くらいで終わった ＼(^o^)／
+
+                    削除した結果↓
+
+                    ```
+                    $ find ./Resources/Images | wc -l  
+                    # 1383 => 1205(180個減)
+                    $ du  ./Resources/Images
+                    # 14576 => 13344 (1.2MB減)
+                    ```
+                </script>
+                </section>
+
+                <section data-markdown>
+                <script type="text/template">
+                    ## 注意1
+
+                    動的にロードした画像には対応できない
+                    
+                    コーディング規約で禁止するしかない
+
+                    ```
+                    NSString* imageName = [NSString stringWithFormat:@"button-%d", buttonNumber];
+                    UIImage* image = [UIImage imageNamed:imageName];
+                    ```
+                </script>
+                </section>
+
+                <section data-markdown>
+                <script type="text/template">
+                    ## 注意2
+
+                    - プロジェクトファイルを手動マージ!  
+                    - 実機で落ちた ／(^o^)＼ 
+                    - Simulatorだとキャッシュされてる(DerivedData) 
+                    - Jenkinsで毎回DerivedDataを削除しつつ、UIテスト回すべき
+                        - (~/Library/Developer/Xcode/DerivedData/app_name-xxxxxx)
+                     
+                </script>
+                </section>
+
+                <section data-markdown>
+                <script type="text/template">
+                    ## ちなみに
+
+                    OCLint調べたけどUnused Resourcesのチェックはない[(unused method parameterのみ)](http://docs.oclint.org/en/dev/howto/suppress.html)
+
+                    Android Lint はUnused Resoucesのチェックを[サポートしてる](http://tools.android.com/tips/lint)
+                </script>
+                </section>
+
+                <section data-markdown>
+                <script type="text/template">
+                    ## ついでに
+
+                    Android Lintの実装も確認してみた
+
+                    [ソースコード](http://search.maven.org/#artifactdetails%7Ccom.android.tools.lint%7Clint-checks%7C22.7.1%7Cjar)
+
+                    ([AOSP](https://source.android.com/)に同梱されてなくて、mavenで引っぱってきてるみたい)
+                </script>
+                </section>
+
+                <section data-markdown>
+                <script type="text/template">
+                    ## com.android.tools.lint.checks;
+
+                    ### fields
+
+                    - private Set<String> mDeclarations; // 存在してるリソースを格納
+                    - private Set<String> mReferences; // 参照されてるリソースを格納
+                    - private Map<String, Location> mUnused; // 使ってないリソースを格納
+                </script>
+                </section>
+
+                <section data-markdown>
+                <script type="text/template">
+                    ## com.android.tools.lint.checks.UnusedResourceDetector;
+
+                    ### 色々準備するmethods
+
+                    DOMのあれこれが面倒そう
+
+                    - public void beforeCheckFile(@NonNull Context context)
+                    - public void visitElement(@NonNull XmlContext context, @NonNull Element element)
+                    - public void visitAttribute(@NonNull XmlContext context, @NonNull Attr attribute)
+                    - private class UnusedResourceVisitor extends ForwardingAstVisitor
+                    - private void checkChildRefs(Element item)
+                    - とかいろいろある
+                </script>
+                </section>
+
+                <section data-markdown>
+                <script type="text/template">
+                    ## com.android.tools.lint.checks.UnusedResourceDetector;
+
+                    ### 仕上げのmethod
+
+                    - public void afterCheckProject(@NonNull Context context)
+
+                    対象を全件操作して、最後にmDeclarationsとmReferencesを比較して mUnusedを作る
+
+                    そもそも命名が、 R.[type].[name]なので、Objective-Cより検出簡単
+                </script>
+                </section>
+
+                <section data-markdown>
+                <script type="text/template">
+                    ## thx!
+                </script>
+                </section>
+            </div>
+        </div>
+
+
+        <script src="../reveal.js/lib/js/head.min.js"></script>
+        <script src="../reveal.js/js/reveal.min.js"></script>
+
+        <script>
+
+            // Full list of configuration options available here:
+            // https://github.com/hakimel/reveal.js#configuration
+            Reveal.initialize({
+            controls: true,
+            progress: true,
+            history: true,
+            center: true,
+
+            theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+            transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+            // Parallax scrolling
+            // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+            // parallaxBackgroundSize: '2100px 900px',
+
+            // Optional libraries used to extend on reveal.js
+            dependencies: [
+            { src: '../reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+            { src: '../reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+            { src: '../reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+            { src: '../reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+            { src: '../reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+            { src: '../reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+            ]
+            });
+
+        </script>
+    </body>
+</html>
