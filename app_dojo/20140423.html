@@ -61,6 +61,22 @@
                 <p><small>source: <a href="http://estimote.com/">estimote beacons</a></small></p>
                 </section>
 
+                <section>
+                <h2>Beacon</h2>
+                <p>Beaconとして使えるものはいろいろある</p>
+                <p>
+                <ul>
+                    <li><a href="http://estimote.com/">Estimote Beacon</a></li>
+                    <li><a href="https://www.sticknfind.com/">sticknfind</a></li>
+                    <li><a href="http://www.aplix.co.jp/?page_id=7593">BM1</a></li>
+                    <li>iOS端末で頑張る</li>
+                </ul>
+                </p>
+                <br />
+                <br />
+                <p><small>source: <a href="http://d.hatena.ne.jp/samril/20131211/1386816475">Beacon端末を比較してみる Estimote & StickNFind & BM1</a></small></p>
+                </section>
+
                 <section data-markdown>
                 <script type="text/template">
                     ## Beaconアプリ作成例
@@ -92,208 +108,67 @@
                 </script>
                 </section>
 
-
                 <section data-markdown>
                 <script type="text/template">
-                    ## grep -R $name_as_resource ./*
-
-                    - 対象ファイルn個くらい
-                    - 1383 * n = x 回 grep走る!
-                    - 手元の環境で5分くらいかかった
-                </script>
-                </section>
-
-                <section data-markdown>
-                <script type="text/template">
-                    ## とりあえずググった
-
-                    [安定のstackoverflow](http://stackoverflow.com/questions/6113243/how-to-find-unused-images-in-an-xcode-project)
+                    ## Beaconを検知する方
 
                     ```
-                    #!/bin/sh
-                    PROJ=`find . -name '*.xib' -o -name '*.[mh]'`
+                    - (void)viewDidLoad {
+                        [super viewDidLoad];
 
-                    for png in `find . -name '*.png'`
-                    do
-                        name=`basename $png`
-                        if ! grep -qhs "$name" "$PROJ"; then
-                            echo "$png is not referenced"
-                        fi
-                    done
-                    ```
-                </script>
-                </section>
-
-                <section data-markdown>
-                <script type="text/template">
-                    ## grep ... (´・ω・｀)
-                </script>
-                </section>
-
-                <section data-markdown>
-                <script type="text/template">
-                    ## [余談]Macのgrep
-
-                    iPhoneアプリのJenkinsって大体Mac => 大体 BSD grep
-
-                    (4年前の話題ですが。。。)
-
-                    * [why GNU grep is fast](http://lists.freebsd.org/pipermail/freebsd-current/2010-August/019310.html)
-                    * [GNU grepが高速な理由](http://news.mynavi.jp/articles/2010/08/25/why-gnu-grep-is-fast-than-bsd/)
-                </script>
-                </section>
-
-                <section data-markdown>
-                <script type="text/template">
-                    ## とりあえず速くしよう
-
-                    grepていうより、繰り返し回数の問題
-
-                    検索対象を一旦メモリに展開(.m/.plist/.xib)
-
-                    ```
-                    my $root_dir = Path::Class::dir(ROOT_DIR);
-                    our $source_text = '';
-                    find(\&process, $root_dir);
-                    # TODO: ソースコードがあんまりデカい場合は、chunkに分けるとか工夫する
-                    sub process {
-                        return unless is_file_using_resources($_);
-                        my $path = $_;
-                        open my $fh, '<', $path
-                        or die qq/Can't open file "$path" : $!/;
-                        my @lines = <$fh>;
-                        $source_text .= join('', @lines);
-                        close($fh);
+                        if ([CLLocationManager isMonitoringAvailableForClass:[CLCircularRegion class]]) {
+                            _locationManager = [CLLocationManager new];
+                            _locationManager.delegate = self;
+                            _proximityUUID = [[NSUUID alloc] initWithUUIDString:@"772BAE40-C984-4D8A-B4C8-2BD2F3A3E6CB"];
+                            _beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:_proximityUUID
+                            identifier:@"org.punchdrunker.beacon"];
+                            // startすると CLLocationManagerDelegate が呼ばれる
+                            [_locationManager startMonitoringForRegion:_beaconRegion];
+                        }
                     }
 
-                    my $images_dir = Path::Class::dir(IMAGE_DIR);
-                    my @fails = ();
-                    while(my $child = $images_dir->next) {
-                        next if $child->is_dir;
-                        my $image = $child;
-                        next if is_retina_image($image); # for short test time
-                        # ignore resources which is loaded dynamic
-                        next if is_4inch_image($image);
-                        next if is_ios6_image($image);
-
-                        my $name_as_resource = get_name_as_resource($image);
-                        next if List::MoreUtils::any {$_ eq $name_as_resource} @blacklist;
-
-                        my $index = index($source_text, $name_as_resource);
-                        push @fails, $name_as_resource if $index==-1;
-                    }
-                    ```
-
-                </script>
-                </section>
-
-                <section data-markdown>
-                <script type="text/template">
-                    ## 結果
-
-                    手元の環境で2秒くらいで終わった ＼(^o^)／
-
-                    削除した結果↓
-
-                    ```
-                    $ find ./Resources/Images | wc -l  
-                    # 1383 => 1205(180個減)
-                    $ du  ./Resources/Images
-                    # 14576 => 13344 (1.2MB減)
                     ```
                 </script>
                 </section>
 
                 <section data-markdown>
                 <script type="text/template">
-                    ## 注意1
+                    ## CLLocationManagerDelegate
 
-                    動的にロードした画像には対応できない
+                    source: [CLLocationManagerDelegate Protocol Reference](https://developer.apple.com/library/ios/documentation/CoreLocation/Reference/CLLocationManagerDelegate_Protocol/CLLocationManagerDelegate/CLLocationManagerDelegate.html)
                     
-                    コーディング規約で禁止するしかない
-
-                    ```
-                    NSString* imageName = [NSString stringWithFormat:@"button-%d", buttonNumber];
-                    UIImage* image = [UIImage imageNamed:imageName];
-                    ```
+                    * locationManager:didEnterRegion:
+                    * locationManager:didExitRegion:
+                    * locationManager:didDetermineState:forRegion:
+                    * locationManager:monitoringDidFailForRegion:withError:
+                    * locationManager:didStartMonitoringForRegion:
+                    * locationManager:rangingBeaconsDidFailForRegion:withError:
+                    * locationManager:didRangeBeacons:inRegion:
+                        * ここに近隣のbeaconがNSArrayで入ってくる
                 </script>
                 </section>
 
                 <section data-markdown>
                 <script type="text/template">
-                    ## 注意2
+                    ## Androidでもいける
 
-                    - プロジェクトファイルを手動マージ!  
-                    - 実機で落ちた ／(^o^)＼ 
-                    - Simulatorだとキャッシュされてる(DerivedData) 
-                    - Jenkinsで毎回DerivedDataを削除しつつ、UIテスト回すべき
-                        - (~/Library/Developer/Xcode/DerivedData/app_name-xxxxxx)
-                     
+                    [Android Beacon Library](http://developer.radiusnetworks.com/ibeacon/android/configure.html)
+
                 </script>
                 </section>
 
                 <section data-markdown>
                 <script type="text/template">
-                    ## ちなみに
+                    ## Sample code for Android
 
-                    OCLint調べたけどUnused Resourcesのチェックはない[(unused method parameterのみ)](http://docs.oclint.org/en/dev/howto/suppress.html)
+                    [sample code](http://developer.radiusnetworks.com/ibeacon/android/samples.html)
 
-                    Android Lint はUnused Resoucesのチェックを[サポートしてる](http://tools.android.com/tips/lint)
                 </script>
                 </section>
 
                 <section data-markdown>
                 <script type="text/template">
-                    ## ついでに
-
-                    Android Lintの実装も確認してみた
-
-                    [ソースコード](http://search.maven.org/#artifactdetails%7Ccom.android.tools.lint%7Clint-checks%7C22.7.1%7Cjar)
-
-                    ([AOSP](https://source.android.com/)に同梱されてなくて、mavenで引っぱってきてるみたい)
-                </script>
-                </section>
-
-                <section data-markdown>
-                <script type="text/template">
-                    ## com.android.tools.lint.checks;
-
-                    ### fields
-
-                    - private Set<String> mDeclarations; // 存在してるリソースを格納
-                    - private Set<String> mReferences; // 参照されてるリソースを格納
-                    - private Map<String, Location> mUnused; // 使ってないリソースを格納
-                </script>
-                </section>
-
-                <section data-markdown>
-                <script type="text/template">
-                    ## com.android.tools.lint.checks.UnusedResourceDetector;
-
-                    ### 色々準備するmethods
-
-                    DOMのあれこれが面倒そう
-
-                    - public void beforeCheckFile(@NonNull Context context)
-                    - public void visitElement(@NonNull XmlContext context, @NonNull Element element)
-                    - public void visitAttribute(@NonNull XmlContext context, @NonNull Attr attribute)
-                    - private class UnusedResourceVisitor extends ForwardingAstVisitor
-                    - private void checkChildRefs(Element item)
-                    - とかいろいろある
-                </script>
-                </section>
-
-                <section data-markdown>
-                <script type="text/template">
-                    ## com.android.tools.lint.checks.UnusedResourceDetector;
-
-                    ### 仕上げのmethod
-
-                    - public void afterCheckProject(@NonNull Context context)
-
-                    対象を全件操作して、最後にmDeclarationsとmReferencesを比較して mUnusedを作る
-
-                    そもそも命名が、 R.[type].[name]なので、Objective-Cより検出簡単
+                    ## Demo
                 </script>
                 </section>
 
