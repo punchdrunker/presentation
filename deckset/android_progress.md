@@ -77,17 +77,11 @@ Linear と Circular の2つ
 
 ---
 
-# [fit]完全に理解した
+# [fit]更新系は?
 
 ---
 
-# [fit]じゃあ、更新系は?
-
----
-
-# 事例
-
-有名そうなアプリのUIを確認してみる
+# 有名なアプリの事例
 
 - twitter
 - facebook
@@ -95,17 +89,77 @@ Linear と Circular の2つ
 
 ---
 
-# 事例
+# 有名なアプリの事例
 
-投稿系はそもそも処理中表示せずに、完了したフリをしてエラーになったら知らせるやり方が主流
+投稿、編集、削除はそもそも処理中表示せずに、完了したフリをしてエラーになったら知らせるやり方が主流ぽい
 
 ---
 
-# [fit]長い処理の表現
+# [fit]時間のかかる処理の表現
 
 ---
 
 ![fit](progress3.mp4)
 
 ---
+
+こんなUI標準で用意されてない...
+
+---
+# 作ろう
+
+Buttonを継承して、Viewを自前でゴニョゴニョすれば出来そう。
+
+面倒なので今回はConstrainLayoutを継承して、ClickableなCustomViewを作った。
+Layoutの実装であればxmlでレイアウトを定義できて簡単に見た目をいじることが出来る。
+
+---
+
+# レイアウト(大体)
+
+TextViewとProgressBarのvisibilityを切り替えればよさそう
+
+``` xml
+<androidx.constraintlayout.widget.ConstraintLayout ...>
+
+    <TextView android:text="Tap!" ... />
+    <ProgressBar android:visibility="gone" ... />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+```
+
+---
+# 実装
+
+コンストラクタで inflateして、OnClickListenerとタッチイベントを自前でハンドリング
+
+---
+# 実装
+
+``` kotlin
+class CustomButton(context: Context, attrs: AttributeSet?) : ConstraintLayout(context, attrs) {
+    var cListener: OnClickListener? = null
+    constructor() { ... // inflate}
+    override fun setOnClickListener(listener: OnClickListener?) {
+        cListener = listener
+    }
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        ... // ACTION_UPでonClickをinvoke
+    }
+
+    // Activityから呼ぶ
+    fun toggle() { ... // visibility更新 }
+}
+```
+
+---
+# Activity側
+
+``` kotlin
+binding.customButton.setOnClickListener {
+    button -> (button as CustomButton).toggle()
+}
+```
+---
+
 # FIN
