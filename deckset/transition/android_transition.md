@@ -1,4 +1,4 @@
-# [fit]Transition indicator
+# [fit] Practical Transition
 
 ### by punchdrunker
 
@@ -31,9 +31,13 @@
 # 用語の説明
 
 - Transition framework(遷移)
-  - 単に画面遷移するだけの機能もあるが、加えてレイアウトにアニメーション効果を付けることもできるフレームワークの総称
+  - 画面遷移でレイアウトにアニメーション効果を付けることもできるフレームワークの総称
 - Transition
   - Transition Managerによって管理される、"遷移"そのもの
+
+---
+
+# 用語の説明
 - SharedElement(View)
   - 遷移元と遷移先で繋ぎ合わせたいView。optionとしてstartActivityに渡す。
 - Transition name(String)
