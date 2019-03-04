@@ -6,7 +6,6 @@
 
 # 自己紹介
 
-- 高校卒業+1年まで札幌在住
 - 2010年〜 iOS/Androidのアプリを書いてみる
 - 2011年〜 mixi(ミクシィ)
 - 2016年〜 家族アルバム みてね(ミクシィ)
@@ -24,7 +23,8 @@
   - 書いた通りに動いてました(反省)
 - 完全に理解した!!
 - 挫折
-- Transition ﾁｮｯﾄﾃﾞｷﾙ ← 今ココ
+- Transition ﾁｮｯﾄﾃﾞｷﾙ
+- Transition 見送り
 
 ---
 
@@ -47,7 +47,15 @@
 
 # お手本にしたもの
 
-twitter公式クライアント
+- android-transition-examples
+  - https://github.com/google/android-transition-examples
+- twitter公式クライアント
+
+---
+
+# Fragment to Fragment
+
+1つのActivity内での遷移はgoogle exampleそのまま
 
 ---
 
@@ -55,11 +63,11 @@ twitter公式クライアント
 
 ---
 
-# Activity to Fragment
+# Fragment to Fragment
 
 ---
 
-# Activity to ViewPager
+# Fragment to ViewPager
 
 ---
 
