@@ -16,9 +16,10 @@ by punchdrunker
 # Dark theme
 
 Qから新しい Dark themeになった(Pからあった)
-省電力
-視覚障害のある人にやさしい
-暗い所で見やすくなる
+
+- 省電力
+- 視覚障害のある人にやさしい
+- 暗い所で見やすくなる
 
 ---
 
@@ -30,48 +31,61 @@ Qから新しい Dark themeになった(Pからあった)
 
 何もしなくても特に困らない
 
+^ たまに、 `-night` リソースが優先される状況になるというだけぽいです。
+
 ---
 
 # 対応した方がいいアプリ
 
-暗いところでも使って欲しいなら対応してあげると親切
+- 暗いところでも使って欲しいなら対応してあげると親切
+- すでにUiModeManager(API 8から)でnight mode対応しているアプリは対応が必要
+  - AppCompatDelegateの同等機能に移行
+    -night リソースを利用するのは一緒なので、対応は楽
 
 ---
 
 # ユーザーとしての使い方
 
 - 設定アプリから有効に
-- 一度有効にすると通知メニューにも出現する
+- 通知メニューの編集から追加することもできる
 - Pixelだとバッテリーセーバーを有効にした時もDark themeになる
 
 ---
 
 # 開発者側から見た使い方
 
-- AppThemeをDayNightを継承したものにすると楽。(かどうかはアプリによる)
+- AppThemeをDayNightを継承したものにすると(必須)
   - Theme.MaterialComponents.DayNightを推奨
   - (Theme.AppCompat.DayNight もある)
-- DayNightなAppThemeを設定することで、OSで設定したnight modeをアプリの中で拾えるようになる。
-- night modeを拾えるようになれば、values-nightでリソース定義できるので、colors.xmlもnight mode用に定義できる。
+- DayNightなAppThemeを設定することで、Viewの背景などを良い感じにしてくれてるぽい
+
+---
+
+# 開発者側から見た使い方
+
+- DayNightなAppThemeを設定しなくても -night リソースは night mode時に優先される
+  - values-night
+  - drawable-night などなど
 
 ---
 
 # アプリの中での切り替え方
 
-- AppCompatDelegate
-- UiModeManager
-
-まぎらわしいけど、UiModeManagerはQのnight modeとは別もの。アプリの中でのモードを切り替えることができるので、Pまでなら、これだけで似たような事が実現できる。
-
-Qからのnight modeはICS以降が対応しおており、OSのnight modeと連携したもの。
-`AppCompatDelegateのsetDefaultNightMode` でモードによるふるまいを変更できる。
+- UiModeManager のnight mode
+  - Api 8から
+  - アプリの中でのモードを切り替えることができる
+- AppCompatDelegate のnight mode
+  - Api 14から 
+  - OSのnight modeと連携したもの。
+  - setDefaultNightMode(mode)
 
 ---
 
 # 色の決め方
+
 MDGにあるとおり
 
-プライマリで言うと
+primary color で言うと
 - 黒を使うとしても、真っ黒は避ける(#121212くらい)
 - もともとの色を使いたい場合は、そのままではなくの彩度を下げると良い(4.5:1に下げたもの)
 
@@ -80,10 +94,11 @@ MDGにあるとおり
 # 色の定義を整理するには
 
 アプリの構造によって対応方針が変わるので、正解はなさそう。現状から最も良い方針を考えましょう。
-ただ、確実に言えるのは以下
-色名にblackとかwhiteとか使うのはやめた方がよさそう(transparentならいいかも)
-機能や部品の名前にしましょう
-色数は少いに越したことはないので、意味もなく1箇所でしか使わない色とかは消した方が良さそう。
+
+以下のような印象
+- 色名にblackとかwhiteとか使うのはやめた方がよさそう(transparentならいいかも)
+  - 機能や部品の名前にしましょう
+- 色数は少いに越したことはないので、意味もなく1箇所でしか使わない色とかは消した方が良さそう。
 
 ---
 
