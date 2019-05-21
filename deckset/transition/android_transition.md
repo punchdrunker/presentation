@@ -1,6 +1,6 @@
-# [fit] Practical Transition
+# [fit] Practical Activity Transition in Android
 
-### by punchdrunker
+by punchdrunker
 
 ---
 
@@ -10,6 +10,14 @@
 - 2011年〜 SNS mixi(ミクシィ)
 - 2016年〜 家族アルバム みてね(ミクシィ)
 - DroidKaigiとかshibuya.apkを運営
+
+---
+
+# Sample code
+
+- https://github.com/punchdrunker/hocho
+- android-transition-examples
+  - https://github.com/google/android-transition-examples
 
 ---
 
@@ -79,10 +87,9 @@
 # Fragment to Fragment
 
 1つのActivity内での遷移はgoogle exampleが好例。
-
 遷移する時のFragmentManagerにaddSharedElementメソッドで遷移元のImageViewとtransitionNameをペアでセットする。
-遷移先のレイアウトではImageView同じtransitionNameをセットしてあげればよい。
-transitionNameの設定はコード側からでもレイアウトxmlからでも可能。
+遷移先でも同様。
+(transitionNameの設定はコード側からでもレイアウトxmlからでも可能。)
 
 --- 
 
@@ -108,10 +115,15 @@ fragment.getFragmentManager()
 
 ---
 
+#[fit]sampleの動き
+
+---
+
 # Activity to Activity
 
 transitionNameをペアで設定するのは同じ。
 startActivityのoptionとして、sharedElementをペアにしたbundleを渡す。
+複数渡したければPair型で可変長引数として渡せる。
 
 ```kotlin
 val intent = ToActivity.createIntent(context, position)
@@ -137,7 +149,7 @@ startActivity(intent, option)
 
 # 問題とその解決法
 
-ここからはサンプルを見ながら解説します
+ここからはサンプルを見ながら解説します(item1&2&3)
 
 ---
 
@@ -164,6 +176,19 @@ private fun shoulScrollList(cell: View): Boolean {
 
 ---
 
+# ViewPagerで困ること
+
+- item4で問題が発生する
+- 回避策をitem5で対応
+
+---
+
+# スワイプした後に戻り先のImageViewを変更するには
+
+コールバックで動的に変更できる
+
+---
+
 # ViewPagerとの連携
 
 必須コールバック
@@ -176,15 +201,40 @@ private fun shoulScrollList(cell: View): Boolean {
 
 ---
 
-# コールバックのタイミング
+# コールバックで何が出来るか
 
-[図解]
+紐付くSharedElementを動的に変更できる
+
+```kotlin
+setExitSharedElementCallback(object : SharedElementCallback() {
+    // names: List<String>, sharedElements: MutableMap<String, View>
+    override fun onMapSharedElements(names: ..., sharedElements: ...) {
+        val viewHolder = fromFragment?.getViewHolder(newPosition)
+        val itemView = viewHolder?.itemView ?: return
+        val photoView = itemView.findViewById<ImageView>(R.id.card_photo)
+        sharedElements[names[0]] = photoView
+    }
+})
+```
 
 ---
 
-# スワイプした後に戻るImageView
+# コールバックのタイミング
 
-コールバックで動的に変更できる
+- Activity A(一覧)からActivity B(詳細)に遷移
+  - AのExitSharedElementCallbackが呼ばれる
+  - BのEnterSharedElementCallbackが呼ばれる
+- BからAに戻る
+  - BのEnterSharedElementCallbackが呼ばれる
+  - AのExitSharedElementCallbackが呼ばれる
+
+---
+
+# なぜ?
+
+戻る時のActivity Transitionは来た時のanimationをreverseする為
+(finishAfterTransition あたりを読むと書いてある)
+
 
 ---
 
@@ -193,10 +243,18 @@ private fun shoulScrollList(cell: View): Boolean {
 諦めた
 
 ---
+
+![inline](twitter-screen.mp4)
+
+---
 # さらなる問題
 
-Xperiaでまともに動かなかった
+Transition Animation が**X?????a** 系の端末でまともに動かなかった👻
 
 ---
 
-# FIN
+# [fit]解散
+
+---
+
+# [fit]FIN
