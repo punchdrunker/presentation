@@ -38,9 +38,10 @@ Qから新しい Dark themeになった(Pからあった)
 # 対応した方がいいアプリ
 
 - 暗いところでも使って欲しいなら対応してあげると親切
+- 背景が真っ白なアプリとかは省エネ効果ありそう
 - すでにUiModeManager(API 8から)でnight mode対応しているアプリは対応が必要
   - AppCompatDelegateの同等機能に移行
-    -night リソースを利用するのは一緒なので、対応は楽
+    - -night リソースを利用するのは一緒なので、対応は楽
 
 ---
 
@@ -50,13 +51,17 @@ Qから新しい Dark themeになった(Pからあった)
 - 通知メニューの編集から追加することもできる
 - Pixelだとバッテリーセーバーを有効にした時もDark themeになる
 
+![fit right](theme-setting.png)
+
+^有効にすると、-nightリソースが有効になる
+
 ---
 
 # 開発者側から見た使い方
 
-- AppThemeをDayNightを継承したものにすると(必須)
-  - Theme.MaterialComponents.DayNightを推奨
-  - (Theme.AppCompat.DayNight もある)
+- AppThemeをDayNightを継承したものにする(必須)
+  - Theme.MaterialComponents.DayNightが推奨
+  - (Theme.AppCompat.DayNight も可)
 - DayNightなAppThemeを設定することで、Viewの背景などを良い感じにしてくれてるぽい
 
 ---
@@ -71,11 +76,9 @@ Qから新しい Dark themeになった(Pからあった)
 
 # アプリの中での切り替え方
 
-- UiModeManager のnight mode
-  - Api 8から
+- UiModeManager のnight mode (Api 8から)
   - アプリの中でのモードを切り替えることができる
-- AppCompatDelegate のnight mode
-  - Api 14から 
+- AppCompatDelegate のnight mode (Api 14から)
   - OSのnight modeと連携したもの。
   - setDefaultNightMode(mode)
 
@@ -116,5 +119,12 @@ https://material.io/develop/android/theming/dark/
 関連API
 https://developer.android.com/reference/androidx/appcompat/app/AppCompatDelegate.html#MODE_NIGHT_FOLLOW_SYSTEM
 
+---
+# Reference
+
+
 具体的な対応方針はMDGから
 https://material.io/design/color/dark-theme.html#usage
+
+実践的な紹介
+https://medium.com/androiddevelopers/appcompat-v23-2-daynight-d10f90c83e94
