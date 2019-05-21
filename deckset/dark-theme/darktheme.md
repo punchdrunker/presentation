@@ -16,9 +16,10 @@ by punchdrunker
 # Dark theme
 
 Qから新しい Dark themeになった(Pからあった)
-省電力
-視覚障害のある人にやさしい
-暗い所で見やすくなる
+
+- 省電力
+- 視覚障害のある人にやさしい
+- 暗い所で見やすくなる
 
 ---
 
@@ -30,11 +31,17 @@ Qから新しい Dark themeになった(Pからあった)
 
 何もしなくても特に困らない
 
+^OSの設定により、 `-night` というサフィックスがついたリソースが有効になるだけ
+
 ---
 
 # 対応した方がいいアプリ
 
-暗いところでも使って欲しいなら対応してあげると親切
+- 暗いところでも使って欲しいなら対応してあげると親切
+- 背景が白いアプリは対応すると省エネになるかも
+- すでにUiModeManageなどでnight mode対応している場合は対応が必要
+  - アプリ内でテーマ切り替えできるとか
+  - AppCompatDelegateを使ってあげる
 
 ---
 
@@ -44,27 +51,60 @@ Qから新しい Dark themeになった(Pからあった)
 - 一度有効にすると通知メニューにも出現する
 - Pixelだとバッテリーセーバーを有効にした時もDark themeになる
 
+![fit right](theme-setting.png)
+
+^ 変更することでnight リソースが優先して表示されるようになります
+
 ---
 
 # 開発者側から見た使い方
 
-- AppThemeをDayNightを継承したものにすると楽。(かどうかはアプリによる)
+- AppThemeをDayNightを継承したものにすると(必須)
   - Theme.MaterialComponents.DayNightを推奨
   - (Theme.AppCompat.DayNight もある)
-- DayNightなAppThemeを設定することで、OSで設定したnight modeをアプリの中で拾えるようになる。
-- night modeを拾えるようになれば、values-nightでリソース定義できるので、colors.xmlもnight mode用に定義できる。
+- DayNightなAppThemeを設定することで、Viewの背景など良い感じにしてくれる
+
+---
+
+# 開発者側から見た使い方
+
+基本的には-night なリソースが優先して参照される
+
+- drawable-night
+- values-night などなど
 
 ---
 
 # アプリの中での切り替え方
 
-- AppCompatDelegate
-- UiModeManager
+- UiModeManager(api 8以上)
+  - Pまでなら、これだけで似たような事が実現できる。
+- AppCompatDelegate(api 14以上)
+  - 端末のモード切り替えを参照できる
+  - Qのnight nodeに対応
 
-まぎらわしいけど、UiModeManagerはQのnight modeとは別もの。アプリの中でのモードを切り替えることができるので、Pまでなら、これだけで似たような事が実現できる。
+正直何が違うかよくわからない。。。
 
-Qからのnight modeはICS以降が対応しおており、OSのnight modeと連携したもの。
-`AppCompatDelegateのsetDefaultNightMode` でモードによるふるまいを変更できる。
+---
+
+// 変更して
+AppCompatDelegate.setDefaultNightMode(mode)
+// 反映する
+// appcompat:1.1.0-alpha05からは不要
+delegate.applyDayNight()
+
+// 変更の通知はこれが呼ばれる
+onNightModeChanged(mode)
+
+---
+
+# mode
+
+- MODE_NIGHT_FOLLOW_SYSTEM
+- MODE_NIGHT_NO
+- MODE_NIGHT_YES
+- MODE_NIGHT_AUTO
+  - 時間判定ぽい?
 
 ---
 
@@ -80,14 +120,15 @@ MDGにあるとおり
 # 色の定義を整理するには
 
 アプリの構造によって対応方針が変わるので、正解はなさそう。現状から最も良い方針を考えましょう。
-ただ、確実に言えるのは以下
-色名にblackとかwhiteとか使うのはやめた方がよさそう(transparentならいいかも)
-機能や部品の名前にしましょう
-色数は少いに越したことはないので、意味もなく1箇所でしか使わない色とかは消した方が良さそう。
+
+- 色名にblackとかwhiteとか使うのはやめた方がよさそう(transparentならいいかも)
+- 機能や部品の名前にしましょう
 
 ---
 
 # Demo 
+
+https://github.com/punchdrunker/hocho/pull/46/files
 
 ---
 # Reference
@@ -101,5 +142,11 @@ https://material.io/develop/android/theming/dark/
 関連API
 https://developer.android.com/reference/androidx/appcompat/app/AppCompatDelegate.html#MODE_NIGHT_FOLLOW_SYSTEM
 
+---
+# Reference
+
 具体的な対応方針はMDGから
 https://material.io/design/color/dark-theme.html#usage
+
+実践的な紹介
+https://medium.com/androiddevelopers/appcompat-v23-2-daynight-d10f90c83e94
