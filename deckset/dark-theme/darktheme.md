@@ -31,7 +31,7 @@ Qから新しい Dark themeになった(Pからあった)
 
 何もしなくても特に困らない
 
-^ たまに、 `-night` リソースが優先される状況になるというだけぽいです。
+^OSの設定により、 `-night` というサフィックスがついたリソースが有効になるだけ
 
 ---
 
@@ -53,34 +53,58 @@ Qから新しい Dark themeになった(Pからあった)
 
 ![fit right](theme-setting.png)
 
-^有効にすると、-nightリソースが有効になる
+^ 変更することでnight リソースが優先して表示されるようになります
 
 ---
 
 # 開発者側から見た使い方
 
-- AppThemeをDayNightを継承したものにする(必須)
-  - Theme.MaterialComponents.DayNightが推奨
-  - (Theme.AppCompat.DayNight も可)
-- DayNightなAppThemeを設定することで、Viewの背景などを良い感じにしてくれてるぽい
+- AppThemeをDayNightを継承したものにすると(必須)
+  - Theme.MaterialComponents.DayNightを推奨
+  - (Theme.AppCompat.DayNight もある)
+- DayNightなAppThemeを設定することで、Viewの背景など良い感じにしてくれる
 
 ---
 
 # 開発者側から見た使い方
 
-- DayNightなAppThemeを設定しなくても -night リソースは night mode時に優先される
-  - values-night
-  - drawable-night などなど
+基本的には-night なリソースが優先して参照される
+
+- drawable-night
+- values-night などなど
 
 ---
 
-# アプリの中での切り替え方
+# 開発者側から見た使い方
 
-- UiModeManager のnight mode (Api 8から)
-  - アプリの中でのモードを切り替えることができる
-- AppCompatDelegate のnight mode (Api 14から)
-  - OSのnight modeと連携したもの。
-  - setDefaultNightMode(mode)
+- UiModeManager(api 8以上)
+  - Pまでなら、これだけで似たような事が実現できる。
+- AppCompatDelegate(api 14以上)
+  - 端末のモード切り替えを参照できる
+  - Qのnight nodeに対応
+
+正直何が違うかよくわからない。。。
+
+---
+
+// 変更して
+AppCompatDelegate.setDefaultNightMode(mode)
+// 反映する
+// appcompat:1.1.0-alpha05からは不要
+delegate.applyDayNight()
+
+// 変更の通知はこれが呼ばれる
+onNightModeChanged(mode)
+
+---
+
+# mode
+
+- MODE_NIGHT_FOLLOW_SYSTEM
+- MODE_NIGHT_NO
+- MODE_NIGHT_YES
+- MODE_NIGHT_AUTO
+  - 時間判定ぽい?
 
 ---
 
@@ -99,13 +123,15 @@ primary color で言うと
 アプリの構造によって対応方針が変わるので、正解はなさそう。現状から最も良い方針を考えましょう。
 
 以下のような印象
+
 - 色名にblackとかwhiteとか使うのはやめた方がよさそう(transparentならいいかも)
-  - 機能や部品の名前にしましょう
-- 色数は少いに越したことはないので、意味もなく1箇所でしか使わない色とかは消した方が良さそう。
+- 機能や部品の名前にしましょう
 
 ---
 
 # Demo 
+
+https://github.com/punchdrunker/hocho/pull/46/files
 
 ---
 # Reference
@@ -121,7 +147,6 @@ https://developer.android.com/reference/androidx/appcompat/app/AppCompatDelegate
 
 ---
 # Reference
-
 
 具体的な対応方針はMDGから
 https://material.io/design/color/dark-theme.html#usage
